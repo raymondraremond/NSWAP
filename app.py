@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 import urllib.parse
+import os
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 
@@ -9,13 +10,24 @@ app = Flask(__name__, static_folder='public', static_url_path='')
 # ---------------------------------------------------------
 # 1. Database Connection & URL Encoding
 # ---------------------------------------------------------
-# PostgreSQL URI Connection
+# Railway injects DATABASE_URL automatically when a Postgres plugin is attached.
+# Falls back to local credentials when running locally.
 
-raw_password = "$A08138529746a"
-safe_password = urllib.parse.quote_plus(raw_password)
+database_url = os.environ.get('DATABASE_URL')
 
-# Explicitly specify psycopg2 driver
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql+psycopg2://postgres:{safe_password}@localhost:5432/exchange_db"
+if database_url:
+    # Railway sometimes provides 'postgres://' which SQLAlchemy requires as 'postgresql://'
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+    elif database_url.startswith('postgresql://'):
+        database_url = database_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Local fallback
+    raw_password = "$A08138529746a"
+    safe_password = urllib.parse.quote_plus(raw_password)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql+psycopg2://postgres:{safe_password}@localhost:5432/exchange_db"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -100,9 +112,9 @@ with app.app_context():
             category_objects = [Category(id=idx + 1, category_name=name) for idx, name in enumerate(CUSTOM_CATEGORIES)]
             db.session.bulk_save_objects(category_objects)
             db.session.commit()
-        print("✅ POSTGRESQL CONNECTED & SCHEMA VERIFIED.")
+        print("[OK] POSTGRESQL CONNECTED & SCHEMA VERIFIED.")
     except Exception as e:
-        print(f"❌ DATABASE CONNECTION ERROR: {e}")
+        print(f"[ERROR] DATABASE CONNECTION ERROR: {e}")
 
 # ---------------------------------------------------------
 # 3. Routes & API Endpoints
