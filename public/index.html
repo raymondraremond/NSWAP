@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>P2P Exchange Network</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
@@ -14,8 +15,8 @@
     <div id="auth-screen" class="screen">
       <div class="card">
         <div class="auth-tabs">
+          <button id="tab-initiation-btn" class="auth-tab" onclick="showAuthMode('initiation')">Sign Up</button>
           <button id="tab-login-btn" class="auth-tab active" onclick="showAuthMode('login')">Log In</button>
-          <button id="tab-initiation-btn" class="auth-tab" onclick="showAuthMode('initiation')">New Member Initiation</button>
         </div>
 
         <!-- FORM 1: Existing Member Login -->
@@ -37,19 +38,19 @@
 
         <!-- STEP 1: Initiation & Payment Instructions -->
         <div id="initiation-step-box" class="hidden">
-          <h2>Membership Initiation</h2>
-          <p class="subtitle-alert">⚠️ Access requires account initiation and identity confirmation.</p>
+          <h2>Sign Up</h2>
+          <p class="subtitle-alert">⚠️ Access requires a one-time membership fee payment via Paystack.</p>
           
           <div class="payment-instructions-box">
-            <div class="payment-status-badge">Payment Gateway Pending</div>
+            <div class="payment-status-badge">Paystack Secure Payment</div>
             <p class="payment-desc">
-              Complete your membership fee transfer using the email instructions sent to you, or proceed via manual confirmation below until our direct Paystack link goes live.
+              Click "Pay &amp; Complete Registration" below to securely pay your membership fee and complete your sign-up instantly.
             </p>
 
             <div class="payment-details-card">
               <div class="pay-row">
                 <span>Initiation Fee:</span>
-                <strong>₦2,000 / One-time</strong>
+                <strong>₦500 / One-time</strong>
               </div>
               <div class="pay-row">
                 <span>Support Email:</span>
@@ -60,35 +61,36 @@
 
           <div class="initiation-actions mt-15">
             <button type="button" class="btn btn-primary" onclick="proceedToRegistration()">
-              I Have Made Payment / Complete Registration ➔
+              Continue to Registration ➔
             </button>
-            <a href="mailto:access@p2pexchange.com?subject=Payment%20Proof" class="btn btn-secondary mt-10 text-center block">
-              ✉️ Email Payment Proof
-            </a>
           </div>
         </div>
 
         <!-- STEP 2: Registration Form -->
         <div id="register-form-box" class="hidden">
           <div class="back-link" onclick="showAuthMode('initiation')">← Back to Payment Instructions</div>
-          <h2>Choose Location & Register</h2>
-          <p class="subtitle-alert">Make Sure you choose your state of deployment</p>
+          <h2>Choose State of Deployment & Register</h2>
+          <p class="subtitle-alert">Please choose your state of deployment to complete registration</p>
 
           <form onsubmit="handleRegister(event)">
             <div class="form-grid">
               <div class="form-group span-2">
-                <label for="reg-state">Select State / FCT</label>
+                <label for="reg-state">Choose State of Deployment</label>
                 <select id="reg-state" required>
-                  <option value="">-- Choose Location --</option>
+                  <option value="">-- Choose State of Deployment --</option>
                 </select>
               </div>
               <div class="form-group span-2">
                 <label for="reg-code">Input your State Code</label>
-                <input type="text" id="reg-code" placeholder="e.g. NG-9021" required />
+                <input type="text" id="reg-code" placeholder="NYSC/RV/C1/1234" required />
               </div>
               <div class="form-group span-2">
                 <label for="reg-name">Full Name</label>
                 <input type="text" id="reg-name" placeholder="John Doe" required />
+              </div>
+              <div class="form-group span-2">
+                <label for="reg-email">Email Address</label>
+                <input type="email" id="reg-email" placeholder="yourname@email.com" required />
               </div>
               <div class="form-group">
                 <label for="reg-sex">Sex</label>
@@ -103,7 +105,7 @@
                 <input type="tel" id="reg-phone" placeholder="08012345678" required />
               </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-15">Finalize Registration</button>
+            <button type="submit" class="btn btn-primary mt-15" id="pay-btn">Pay ₦500 &amp; Complete Registration</button>
           </form>
         </div>
       </div>
@@ -184,6 +186,11 @@
   </div>
 
   <script>
+    // -------------------------------------------------------
+    // PAYSTACK CONFIG — replace with your live key when ready
+    // -------------------------------------------------------
+    const PAYSTACK_PUBLIC_KEY = 'YOUR_PAYSTACK_PUBLIC_KEY_HERE';
+
     let activeUser = null;
     let currentPage = 'currency';
 
@@ -206,7 +213,7 @@
         const data = await res.json();
         if (data.success) {
           const regSelect = document.getElementById('reg-state');
-          regSelect.innerHTML = '<option value="">-- Choose Location --</option>';
+          regSelect.innerHTML = '<option value="">-- Choose State of Deployment --</option>';
           data.categories.forEach(cat => {
             regSelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
           });
@@ -260,28 +267,69 @@
 
     async function handleRegister(e) {
       e.preventDefault();
+
       const payload = {
         code: document.getElementById('reg-code').value.trim(),
         name: document.getElementById('reg-name').value.trim(),
+        email: document.getElementById('reg-email').value.trim(),
         sex: document.getElementById('reg-sex').value,
         phone: document.getElementById('reg-phone').value.trim(),
         category_id: parseInt(document.getElementById('reg-state').value)
       };
 
-      const res = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
+      // Disable button to prevent double-clicks
+      const payBtn = document.getElementById('pay-btn');
+      payBtn.disabled = true;
+      payBtn.innerText = 'Opening payment...';
 
-      if (data.success) {
-        activeUser = data.user;
-        sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
-        displayMainApp();
-      } else {
-        alert(data.message);
-      }
+      // Open Paystack popup — registration only fires on successful payment
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: payload.email,
+        amount: 50000, // ₦500 in kobo
+        currency: 'NGN',
+        ref: 'NSWAP_' + Date.now() + '_' + Math.floor(Math.random() * 1e6),
+        metadata: {
+          custom_fields: [
+            { display_name: 'Full Name',   variable_name: 'full_name',   value: payload.name },
+            { display_name: 'State Code',  variable_name: 'state_code',  value: payload.code },
+            { display_name: 'Phone',       variable_name: 'phone',       value: payload.phone }
+          ]
+        },
+        callback: async function(response) {
+          // Payment successful — now register the user
+          try {
+            const res = await fetch('/api/users/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+              activeUser = data.user;
+              sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
+              displayMainApp();
+            } else {
+              alert('Payment received but registration failed: ' + data.message);
+              payBtn.disabled = false;
+              payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
+            }
+          } catch (err) {
+            alert('Payment received but a network error occurred. Please contact support with ref: ' + response.reference);
+            payBtn.disabled = false;
+            payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
+          }
+        },
+        onClose: function() {
+          // User closed payment window without paying
+          payBtn.disabled = false;
+          payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
+          alert('Payment was not completed. Please pay the \u20a6500 fee to complete your sign up.');
+        }
+      });
+
+      handler.openIframe();
     }
 
     function displayMainApp() {
