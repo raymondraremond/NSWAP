@@ -277,59 +277,83 @@
         category_id: parseInt(document.getElementById('reg-state').value)
       };
 
-      // Disable button to prevent double-clicks
       const payBtn = document.getElementById('pay-btn');
+
+      // Helper to reset the button back to clickable
+      function resetBtn() {
+        payBtn.disabled = false;
+        payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
+      }
+
+      // Guard: make sure Paystack script actually loaded
+      if (typeof PaystackPop === 'undefined') {
+        alert('Payment system is still loading. Please wait a moment and try again.');
+        return;
+      }
+
       payBtn.disabled = true;
       payBtn.innerText = 'Opening payment...';
 
-      // Open Paystack popup — registration only fires on successful payment
-      const handler = PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: payload.email,
-        amount: 50000, // ₦500 in kobo
-        currency: 'NGN',
-        ref: 'NSWAP_' + Date.now() + '_' + Math.floor(Math.random() * 1e6),
-        metadata: {
-          custom_fields: [
-            { display_name: 'Full Name',   variable_name: 'full_name',   value: payload.name },
-            { display_name: 'State Code',  variable_name: 'state_code',  value: payload.code },
-            { display_name: 'Phone',       variable_name: 'phone',       value: payload.phone }
-          ]
-        },
-        callback: async function(response) {
-          // Payment successful — now register the user
-          try {
-            const res = await fetch('/api/users/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-
-            if (data.success) {
-              activeUser = data.user;
-              sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
-              displayMainApp();
-            } else {
-              alert('Payment received but registration failed: ' + data.message);
-              payBtn.disabled = false;
-              payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
-            }
-          } catch (err) {
-            alert('Payment received but a network error occurred. Please contact support with ref: ' + response.reference);
-            payBtn.disabled = false;
-            payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
-          }
-        },
-        onClose: function() {
-          // User closed payment window without paying
-          payBtn.disabled = false;
-          payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
-          alert('Payment was not completed. Please pay the \u20a6500 fee to complete your sign up.');
+      // Safety net: if popup never appears within 12 seconds, unfreeze the button
+      const safetyTimer = setTimeout(function() {
+        if (payBtn.disabled) {
+          resetBtn();
+          alert('Payment window did not open. This may be due to a popup blocker. Please allow popups for this site and try again.');
         }
-      });
+      }, 12000);
 
-      handler.openIframe();
+      try {
+        const handler = PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: payload.email,
+          amount: 50000,   // \u20a6500 in kobo
+          currency: 'NGN',
+          ref: 'NSWAP_' + Date.now() + '_' + Math.floor(Math.random() * 1e6),
+          metadata: {
+            custom_fields: [
+              { display_name: 'Full Name',  variable_name: 'full_name',  value: payload.name },
+              { display_name: 'State Code', variable_name: 'state_code', value: payload.code },
+              { display_name: 'Phone',      variable_name: 'phone',      value: payload.phone }
+            ]
+          },
+          callback: async function(response) {
+            clearTimeout(safetyTimer);
+            // Payment successful \u2014 now register the user
+            payBtn.innerText = 'Completing registration...';
+            try {
+              const res = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              const data = await res.json();
+              if (data.success) {
+                activeUser = data.user;
+                sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
+                displayMainApp();
+              } else {
+                alert('Payment was received but registration failed: ' + data.message + '\nPayment ref: ' + response.reference);
+                resetBtn();
+              }
+            } catch (err) {
+              alert('Network error after payment. Please contact support.\nPayment ref: ' + response.reference);
+              resetBtn();
+            }
+          },
+          onClose: function() {
+            clearTimeout(safetyTimer);
+            resetBtn();
+            alert('Payment window closed. Please complete the \u20a6500 payment to finish your sign up.');
+          }
+        });
+
+        handler.openIframe();
+
+      } catch (err) {
+        clearTimeout(safetyTimer);
+        resetBtn();
+        alert('Could not open payment window: ' + err.message + '\nPlease check your internet connection and try again.');
+      }
     }
 
     function displayMainApp() {
