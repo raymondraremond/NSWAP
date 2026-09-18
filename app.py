@@ -4,6 +4,9 @@ from sqlalchemy import text
 import urllib.parse
 import os
 
+# Paystack secret key — set this in Railway environment variables
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+
 app = Flask(__name__, static_folder='public', static_url_path='')
 
 
