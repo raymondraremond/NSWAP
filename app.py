@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 import urllib.parse
 import os
+import re
 import hmac
 import hashlib
 import requests as http_requests
@@ -548,7 +549,10 @@ def initialize_payment():
 
     # ── Create Paystack transaction via backend ───────────────────────────────
     ts        = int(datetime.now(timezone.utc).timestamp() * 1000)
-    reference = f'NSWAP_{requester_id}_{exchange_type}_{entry_id}_{ts}'
+    # Paystack only allows alphanumeric + hyphens in references.
+    # NYSC state codes contain '/' so we strip all non-alphanumeric chars first.
+    safe_id   = re.sub(r'[^A-Za-z0-9]', '', requester_id)
+    reference = f'NSWAP-{safe_id}-{exchange_type}-{entry_id}-{ts}'
 
     try:
         resp = http_requests.post(
