@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P2P Exchange Network</title>
+  <title>NSWAP — NYSC Swap Platform</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
   <div class="app-container">
-    
-    <!-- Entry Gateway -->
+
+    <!-- ══════════════════════════════════════════════════════
+         AUTH SCREEN
+    ══════════════════════════════════════════════════════ -->
     <div id="auth-screen" class="screen">
       <div class="card">
         <div class="auth-tabs">
@@ -19,7 +21,7 @@
           <button id="tab-login-btn" class="auth-tab active" onclick="showAuthMode('login')">Log In</button>
         </div>
 
-        <!-- FORM 1: Existing Member Login -->
+        <!-- FORM: Existing Member Login -->
         <div id="login-form-box">
           <h2>Member Login</h2>
           <p class="desc">Enter your State Code and Full Name to access your state exchanges.</p>
@@ -36,41 +38,10 @@
           </form>
         </div>
 
-        <!-- STEP 1: Initiation & Payment Instructions -->
-        <div id="initiation-step-box" class="hidden">
-          <h2>Sign Up</h2>
-          <p class="subtitle-alert">⚠️ Access requires a one-time membership fee payment via Paystack.</p>
-          
-          <div class="payment-instructions-box">
-            <div class="payment-status-badge">Paystack Secure Payment</div>
-            <p class="payment-desc">
-              Click "Pay &amp; Complete Registration" below to securely pay your membership fee and complete your sign-up instantly.
-            </p>
-
-            <div class="payment-details-card">
-              <div class="pay-row">
-                <span>Initiation Fee:</span>
-                <strong>₦500 / One-time</strong>
-              </div>
-              <div class="pay-row">
-                <span>Support Email:</span>
-                <a href="mailto:access@p2pexchange.com?subject=Payment%20Verification%20Request" class="email-link">access@p2pexchange.com</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="initiation-actions mt-15">
-            <button type="button" class="btn btn-primary" onclick="proceedToRegistration()">
-              Continue to Registration ➔
-            </button>
-          </div>
-        </div>
-
-        <!-- STEP 2: Registration Form -->
+        <!-- FORM: New Member Registration (FREE — no payment required) -->
         <div id="register-form-box" class="hidden">
-          <div class="back-link" onclick="showAuthMode('initiation')">← Back to Payment Instructions</div>
-          <h2>Choose State of Deployment & Register</h2>
-          <p class="subtitle-alert">Please choose your state of deployment to complete registration</p>
+          <h2>Create Your Account</h2>
+          <p class="desc">Registration is free. Fill in your NYSC details to get started.</p>
 
           <form onsubmit="handleRegister(event)">
             <div class="form-grid">
@@ -81,7 +52,7 @@
                 </select>
               </div>
               <div class="form-group span-2">
-                <label for="reg-code">Input your State Code</label>
+                <label for="reg-code">Your NYSC State Code</label>
                 <input type="text" id="reg-code" placeholder="NYSC/RV/C1/1234" required />
               </div>
               <div class="form-group span-2">
@@ -105,13 +76,19 @@
                 <input type="tel" id="reg-phone" placeholder="08012345678" required />
               </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-15" id="pay-btn">Pay ₦500 &amp; Complete Registration</button>
+            <button type="submit" class="btn btn-primary mt-15" id="reg-btn">
+              Complete Registration — Free
+            </button>
           </form>
         </div>
-      </div>
-    </div>
 
-    <!-- Main Dashboard -->
+      </div>
+    </div><!-- /auth-screen -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN DASHBOARD
+    ══════════════════════════════════════════════════════ -->
     <div id="main-app" class="hidden">
       <header class="app-header">
         <div class="user-badge-row">
@@ -131,14 +108,14 @@
       <nav class="nav-tabs-wrapper">
         <div class="nav-tabs">
           <button class="tab-btn active" onclick="switchPage('currency', event)">JUNGLE BOOTS</button>
-          <button class="tab-btn" onclick="switchPage('crypto', event)">WHITE CANVAS</button>
-          <button class="tab-btn" onclick="switchPage('goods', event)">KHAKI SHIRT</button>
-          <button class="tab-btn" onclick="switchPage('services', event)">KHAKI TROUSERS</button>
+          <button class="tab-btn"        onclick="switchPage('crypto',   event)">WHITE CANVAS</button>
+          <button class="tab-btn"        onclick="switchPage('goods',    event)">KHAKI SHIRT</button>
+          <button class="tab-btn"        onclick="switchPage('services', event)">KHAKI TROUSERS</button>
         </div>
       </nav>
-      <!-- these navigations uses a label for the backend differnt from what is represented here-->
+      <!-- these navigations uses a label for the backend different from what is represented here-->
         <!--currency', event)">JUNGLE BOOTS
-            ('crypto', event)">WHITR CANVAS
+            ('crypto', event)">WHITE CANVAS
             ('goods', event)">KHAKI SHIRT
             ('services', event)">KHAKI TROUSERS
                                              -->
@@ -167,33 +144,41 @@
         </div>
       </main>
 
-      <!-- User Contact Modal -->
+      <!-- Contact Modal -->
       <dialog id="user-modal" class="modal">
         <div class="modal-content">
           <h3>PCMs Contact Details</h3>
           <hr />
           <div class="details-grid">
             <p><strong>STATE CODE:</strong> <span id="view-code"></span></p>
-            <p><strong>Name:</strong> <span id="view-name"></span></p>
-            <p><strong>Sex:</strong> <span id="view-sex"></span></p>
-            <p><strong>Phone:</strong> <a id="view-phone-link" href="#" class="phone-link"><span id="view-phone"></span></a></p>
+            <p><strong>Name:</strong>       <span id="view-name"></span></p>
+            <p><strong>Sex:</strong>        <span id="view-sex"></span></p>
+            <p><strong>Phone:</strong>
+              <a id="view-phone-link" href="#" class="phone-link">
+                <span id="view-phone"></span>
+              </a>
+            </p>
             <p><strong>State:</strong> <span id="view-cat"></span></p>
           </div>
           <button class="btn btn-secondary mt-15" onclick="closeUserModal()">Close</button>
         </div>
       </dialog>
-    </div>
-  </div>
+
+    </div><!-- /main-app -->
+  </div><!-- /app-container -->
+
 
   <script>
-    // -------------------------------------------------------
-    // PAYSTACK CONFIG — replace with your live key when ready
-    // -------------------------------------------------------
+    // ─────────────────────────────────────────────────────────
+    // Paystack PUBLIC key — safe to be in frontend source.
+    // Secret key is only in Railway env vars, never here.
+    // ─────────────────────────────────────────────────────────
     const PAYSTACK_PUBLIC_KEY = 'pk_test_2c5531973d75e047e252cfd95404bd832de703c1';
 
-    let activeUser = null;
-    let currentPage = 'currency';
+    let activeUser   = null;
+    let currentPage  = 'currency';
 
+    // ─── Init ────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
       loadCategories();
       checkExistingSession();
@@ -209,50 +194,47 @@
 
     async function loadCategories() {
       try {
-        const res = await fetch('/api/categories');
+        const res  = await fetch('/api/categories');
         const data = await res.json();
         if (data.success) {
-          const regSelect = document.getElementById('reg-state');
-          regSelect.innerHTML = '<option value="">-- Choose State of Deployment --</option>';
+          const sel = document.getElementById('reg-state');
+          sel.innerHTML = '<option value="">-- Choose State of Deployment --</option>';
           data.categories.forEach(cat => {
-            regSelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+            sel.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
           });
         }
       } catch (err) {
-        console.error("Error loading states:", err);
+        console.error('Error loading states:', err);
       }
     }
 
+    // ─── Auth Tab Switching ──────────────────────────────────
     function showAuthMode(mode) {
       document.getElementById('login-form-box').classList.add('hidden');
-      document.getElementById('initiation-step-box').classList.add('hidden');
       document.getElementById('register-form-box').classList.add('hidden');
 
       if (mode === 'login') {
         document.getElementById('tab-login-btn').classList.add('active');
         document.getElementById('tab-initiation-btn').classList.remove('active');
         document.getElementById('login-form-box').classList.remove('hidden');
-      } else if (mode === 'initiation') {
+      } else {
+        // 'initiation' goes directly to the free registration form
         document.getElementById('tab-initiation-btn').classList.add('active');
         document.getElementById('tab-login-btn').classList.remove('active');
-        document.getElementById('initiation-step-box').classList.remove('hidden');
+        document.getElementById('register-form-box').classList.remove('hidden');
       }
     }
 
-    function proceedToRegistration() {
-      document.getElementById('initiation-step-box').classList.add('hidden');
-      document.getElementById('register-form-box').classList.remove('hidden');
-    }
-
+    // ─── Login ───────────────────────────────────────────────
     async function handleLogin(e) {
       e.preventDefault();
       const code = document.getElementById('login-code').value.trim();
       const name = document.getElementById('login-name').value.trim();
 
-      const res = await fetch('/api/users/login', {
-        method: 'POST',
+      const res  = await fetch('/api/users/login', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, name })
+        body:    JSON.stringify({ code, name }),
       });
       const data = await res.json();
 
@@ -265,96 +247,59 @@
       }
     }
 
+    // ─── Register (FREE — no payment) ───────────────────────
     async function handleRegister(e) {
       e.preventDefault();
 
+      const btn = document.getElementById('reg-btn');
+      btn.disabled  = true;
+      btn.innerText = 'Registering...';
+
       const payload = {
-        code: document.getElementById('reg-code').value.trim(),
-        name: document.getElementById('reg-name').value.trim(),
-        email: document.getElementById('reg-email').value.trim(),
-        sex: document.getElementById('reg-sex').value,
-        phone: document.getElementById('reg-phone').value.trim(),
-        category_id: parseInt(document.getElementById('reg-state').value)
+        code:        document.getElementById('reg-code').value.trim(),
+        name:        document.getElementById('reg-name').value.trim(),
+        email:       document.getElementById('reg-email').value.trim(),
+        sex:         document.getElementById('reg-sex').value,
+        phone:       document.getElementById('reg-phone').value.trim(),
+        category_id: parseInt(document.getElementById('reg-state').value),
       };
 
-      const payBtn = document.getElementById('pay-btn');
-
-      // Helper to reset the button back to clickable
-      function resetBtn() {
-        payBtn.disabled = false;
-        payBtn.innerText = 'Pay \u20a6500 & Complete Registration';
-      }
-
-      // Guard: make sure Paystack script actually loaded
-      if (typeof PaystackPop === 'undefined') {
-        alert('Payment system is still loading. Please wait a moment and try again.');
-        return;
-      }
-
-      payBtn.disabled = true;
-      payBtn.innerText = 'Opening payment...';
-
       try {
-        const handler = PaystackPop.setup({
-          key: PAYSTACK_PUBLIC_KEY,
-          email: payload.email,
-          amount: 50000,   // \u20a6500 in kobo
-          currency: 'NGN',
-          ref: 'NSWAP_' + Date.now() + '_' + Math.floor(Math.random() * 1e6),
-          metadata: {
-            custom_fields: [
-              { display_name: 'Full Name',  variable_name: 'full_name',  value: payload.name },
-              { display_name: 'State Code', variable_name: 'state_code', value: payload.code },
-              { display_name: 'Phone',      variable_name: 'phone',      value: payload.phone }
-            ]
-          },
-          callback: function(response) {
-            payBtn.innerText = 'Completing registration...';
-            // Paystack v1 does not accept async callbacks — use async IIFE inside
-            (async function() {
-              try {
-                const res = await fetch('/api/users/register', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.success) {
-                  activeUser = data.user;
-                  sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
-                  displayMainApp();
-                } else {
-                  alert('Payment received but registration failed: ' + data.message + '\nPayment ref: ' + response.reference);
-                  resetBtn();
-                }
-              } catch (err) {
-                alert('Network error after payment. Contact support.\nPayment ref: ' + response.reference);
-                resetBtn();
-              }
-            })();
-          },
-          onClose: function() {
-            resetBtn();
-            alert('Payment window closed. Please complete the \u20a6500 payment to finish your sign up.');
-          }
+        const res  = await fetch('/api/users/register', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
         });
+        const data = await res.json();
 
-        handler.openIframe();
-
+        if (data.success) {
+          activeUser = data.user;
+          sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
+          displayMainApp();
+        } else {
+          alert(data.message);
+          btn.disabled  = false;
+          btn.innerText = 'Complete Registration — Free';
+        }
       } catch (err) {
-        resetBtn();
-        alert('Could not open payment window: ' + err.message + '\nPlease check your internet connection and try again.');
+        alert('Network error. Please try again.');
+        btn.disabled  = false;
+        btn.innerText = 'Complete Registration — Free';
       }
     }
 
+    // ─── Display Main App ────────────────────────────────────
     function displayMainApp() {
-      document.getElementById('active-user-code').innerText = activeUser.code || activeUser.identifier || '---';
-      document.getElementById('active-locked-state').innerText = activeUser.state_name || activeUser.state || '---';
+      document.getElementById('active-user-code').innerText =
+        activeUser.code || activeUser.identifier || '---';
+      document.getElementById('active-locked-state').innerText =
+        activeUser.state_name || activeUser.state || '---';
       document.getElementById('auth-screen').classList.add('hidden');
       document.getElementById('main-app').classList.remove('hidden');
       loadPageData();
     }
 
+    // ─── Logout ──────────────────────────────────────────────
     function logout() {
       sessionStorage.removeItem('p2p_active_user');
       activeUser = null;
@@ -363,9 +308,10 @@
       showAuthMode('login');
     }
 
+    // ─── Tab / Page Switching ────────────────────────────────
     function switchPage(pageType, evt) {
       currentPage = pageType;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       evt.target.classList.add('active');
 
       if (pageType === 'currency') {
@@ -385,11 +331,12 @@
       loadPageData();
     }
 
+    // ─── Load Feed ───────────────────────────────────────────
     async function loadPageData() {
       const stateLabel = activeUser.state_name || activeUser.state || '';
       document.getElementById('page-title').innerText = `Items available in ${stateLabel}`;
-      
-      const res = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`);
+
+      const res  = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`);
       const data = await res.json();
       const feed = document.getElementById('order-feed');
       feed.innerHTML = '';
@@ -402,9 +349,10 @@
       const userCode = activeUser.code || activeUser.identifier;
 
       data.entries.forEach(entry => {
-        const isOwner = entry.user_id === userCode;
+        const isOwner   = entry.user_id === userCode;
         const hasMatched = entry.matched_by_users && entry.matched_by_users.includes(userCode);
 
+        // ── Action button ──────────────────────────────────────
         let actionButtonHtml = '';
         if (isOwner) {
           actionButtonHtml = `
@@ -423,16 +371,26 @@
             </button>`;
         }
 
-        const matchBadgeHtml = entry.match_count > 0 
+        // ── Match badge ────────────────────────────────────────
+        const matchBadgeHtml = entry.match_count > 0
           ? `<span class="badge-matched">MATCHED (${entry.match_count})</span>`
           : `<span class="badge-open">OPEN</span>`;
+
+        // ── Contact unlock button (hidden for own listings) ────
+        const unlockBtnHtml = isOwner ? '' : `
+          <button
+            class="btn-link btn-unlock-contact"
+            id="unlock-btn-${currentPage}-${entry.id}"
+            onclick="unlockContact('${currentPage}', ${entry.id}, this)">
+            🔒 Unlock Contact — ₦500
+          </button>`;
 
         feed.innerHTML += `
           <div class="feed-card">
             <div class="feed-header">
               <span class="user-id-tag">STATE CODE: ${entry.user_id}</span>
               ${matchBadgeHtml}
-              <button class="btn-link" onclick="viewUser('${entry.user_id}')">Contact PCM ➔</button>
+              ${unlockBtnHtml}
             </div>
             <div class="feed-body">
               <div class="feed-row have"><span class="label">I HAVE:</span> <strong>${entry.have}</strong></div>
@@ -446,20 +404,21 @@
       });
     }
 
+    // ─── Submit Listing ──────────────────────────────────────
     async function submitExchangeListing() {
-      const have = document.getElementById('post-have').value.trim();
-      const need = document.getElementById('post-need').value.trim();
+      const have     = document.getElementById('post-have').value.trim();
+      const need     = document.getElementById('post-need').value.trim();
       const userCode = activeUser.code || activeUser.identifier;
 
       if (!have || !need) return alert('Please enter both listing details.');
 
-      const res = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`, {
-        method: 'POST',
+      const res  = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userCode, have, need })
+        body:    JSON.stringify({ user_id: userCode, have, need }),
       });
-
       const data = await res.json();
+
       if (data.success) {
         document.getElementById('post-have').value = '';
         document.getElementById('post-need').value = '';
@@ -469,75 +428,181 @@
       }
     }
 
+    // ─── Mark Matched ────────────────────────────────────────
     async function markAsMatched(entryId) {
       const userCode = activeUser.code || activeUser.identifier;
-      const res = await fetch(`/api/exchanges/${currentPage}/${entryId}/match`, {
-        method: 'POST',
+      const res      = await fetch(`/api/exchanges/${currentPage}/${entryId}/match`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userCode })
+        body:    JSON.stringify({ user_id: userCode }),
       });
       const data = await res.json();
-
-      if (data.success) {
-        loadPageData();
-      } else {
-        alert(data.message);
-      }
+      if (data.success) { loadPageData(); } else { alert(data.message); }
     }
 
+    // ─── Mark Settled ────────────────────────────────────────
     async function markAsSettled(entryId) {
       if (!confirm('Are you sure this deal is settled? It will be permanently deleted.')) return;
       const userCode = activeUser.code || activeUser.identifier;
 
-      const res = await fetch(`/api/exchanges/${currentPage}/${entryId}?user_id=${userCode}`, {
-        method: 'DELETE'
-      });
+      const res  = await fetch(
+        `/api/exchanges/${currentPage}/${entryId}?user_id=${encodeURIComponent(userCode)}`,
+        { method: 'DELETE' }
+      );
       const data = await res.json();
+      if (data.success) { loadPageData(); } else { alert(data.message); }
+    }
 
-      if (data.success) {
-        loadPageData();
-      } else {
-        alert(data.message);
+    // ─── Unlock Contact — ₦500 via Paystack ─────────────────
+    async function unlockContact(exchangeType, entryId, btn) {
+      const userCode = activeUser.code || activeUser.identifier;
+      let   email    = activeUser.email || '';
+
+      // Ask for email if not stored (older accounts)
+      if (!email) {
+        email = prompt(
+          'Enter your email address to process the ₦500 contact-unlock payment:'
+        );
+        if (!email || !email.includes('@')) {
+          alert('A valid email is required to unlock contact.');
+          return;
+        }
+        // Cache it for this session
+        activeUser.email = email;
+        sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
+      }
+
+      const originalText = btn.innerText;
+      btn.disabled  = true;
+      btn.innerText = 'Checking...';
+
+      try {
+        // ── Step 1: Ask backend to initialise (or confirm already unlocked) ──
+        const initRes  = await fetch('/api/payment/initialize', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            user_id:       userCode,
+            exchange_type: exchangeType,
+            entry_id:      entryId,
+            email:         email,
+          }),
+        });
+        const initData = await initRes.json();
+
+        if (!initData.success) {
+          alert(initData.message || 'Could not initialise payment.');
+          btn.disabled  = false;
+          btn.innerText = originalText;
+          return;
+        }
+
+        // ── Already unlocked — show contact directly ───────────────────────
+        if (initData.contact) {
+          openContactModal(initData.contact);
+          btn.disabled  = false;
+          btn.innerText = '✅ View Contact Again';
+          return;
+        }
+
+        // ── New payment required ────────────────────────────────────────────
+        const reference = initData.reference;
+
+        if (typeof PaystackPop === 'undefined') {
+          alert('Payment system is loading. Please wait a moment and try again.');
+          btn.disabled  = false;
+          btn.innerText = originalText;
+          return;
+        }
+
+        btn.innerText = 'Opening payment...';
+
+        const handler = PaystackPop.setup({
+          key:      PAYSTACK_PUBLIC_KEY,
+          email:    email,
+          amount:   50000,       // ₦500 in kobo
+          currency: 'NGN',
+          ref:      reference,   // server-generated reference
+
+          callback: function(response) {
+            btn.innerText = 'Verifying payment...';
+
+            // ── Step 2: Ask backend to verify with Paystack ──────────────────
+            (async function() {
+              try {
+                const verRes  = await fetch('/api/payment/verify', {
+                  method:  'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body:    JSON.stringify({
+                    reference: response.reference,
+                    user_id:   userCode,
+                  }),
+                });
+                const verData = await verRes.json();
+
+                if (verData.success && verData.contact) {
+                  openContactModal(verData.contact);
+                  btn.disabled  = false;
+                  btn.innerText = '✅ View Contact Again';
+                } else {
+                  alert(verData.message || 'Payment verification failed. Contact support.');
+                  btn.disabled  = false;
+                  btn.innerText = originalText;
+                }
+              } catch (err) {
+                alert('Network error during verification. Please try again or contact support.');
+                btn.disabled  = false;
+                btn.innerText = originalText;
+              }
+            })();
+          },
+
+          onClose: function() {
+            btn.disabled  = false;
+            btn.innerText = originalText;
+            // Silently cancelled — no alert needed
+          },
+        });
+
+        handler.openIframe();
+        btn.disabled  = false;   // re-enable so user can re-open if they close
+        btn.innerText = originalText;
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled  = false;
+        btn.innerText = originalText;
       }
     }
 
-    async function viewUser(id) {
-  try {
-    const res = await fetch(`/api/users/details?id=${encodeURIComponent(id)}`);
-    const data = await res.json();
-    
-    if (data.success) {
-      const u = data.user;
-      document.getElementById('view-code').innerText = u.code || u.identifier || id;
-      document.getElementById('view-name').innerText = u.name || 'N/A';
-      document.getElementById('view-sex').innerText = u.sex || 'N/A';
-      document.getElementById('view-phone').innerText = u.phone || 'N/A';
-      document.getElementById('view-phone-link').href = `tel:${u.phone || ''}`;
-      document.getElementById('view-cat').innerText = u.state || 'N/A';
+    // ─── Open Contact Modal ──────────────────────────────────
+    function openContactModal(contact) {
+      document.getElementById('view-code').innerText  = contact.code  || '---';
+      document.getElementById('view-name').innerText  = contact.name  || '---';
+      document.getElementById('view-sex').innerText   = contact.sex   || '---';
+      document.getElementById('view-phone').innerText = contact.phone || '---';
+      document.getElementById('view-phone-link').href = `tel:${contact.phone || ''}`;
+      document.getElementById('view-cat').innerText   = contact.state || '---';
 
       const modal = document.getElementById('user-modal');
-      if (modal && typeof modal.showModal === "function") {
+      if (modal && typeof modal.showModal === 'function') {
         modal.showModal();
       } else {
-        alert(`Contact Info:\nCode: ${u.code}\nName: ${u.name}\nPhone: ${u.phone}`);
+        alert(
+          `Contact Info:\nCode: ${contact.code}\nName: ${contact.name}\nPhone: ${contact.phone}`
+        );
       }
-    } else {
-      alert(data.message || 'Could not fetch user info.');
     }
-  } catch (err) {
-    console.error("Error fetching user details:", err);
-    alert('Could not open user contact details.');
-  }
-}
-   
+
     function closeUserModal() {
       const modal = document.getElementById('user-modal');
-      if (modal && typeof modal.close === "function") {
+      if (modal && typeof modal.close === 'function') {
         modal.close();
       } else {
         modal.removeAttribute('open');
       }
     }
+
   </script>
 </body>
 </html>
