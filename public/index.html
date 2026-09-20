@@ -316,29 +316,31 @@
               { display_name: 'Phone',      variable_name: 'phone',      value: payload.phone }
             ]
           },
-          callback: async function(response) {
+          callback: function(response) {
             clearTimeout(safetyTimer);
-            // Payment successful \u2014 now register the user
             payBtn.innerText = 'Completing registration...';
-            try {
-              const res = await fetch('/api/users/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-              });
-              const data = await res.json();
-              if (data.success) {
-                activeUser = data.user;
-                sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
-                displayMainApp();
-              } else {
-                alert('Payment was received but registration failed: ' + data.message + '\nPayment ref: ' + response.reference);
+            // Paystack v1 does not accept async callbacks — use async IIFE inside
+            (async function() {
+              try {
+                const res = await fetch('/api/users/register', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                  activeUser = data.user;
+                  sessionStorage.setItem('p2p_active_user', JSON.stringify(activeUser));
+                  displayMainApp();
+                } else {
+                  alert('Payment received but registration failed: ' + data.message + '\nPayment ref: ' + response.reference);
+                  resetBtn();
+                }
+              } catch (err) {
+                alert('Network error after payment. Contact support.\nPayment ref: ' + response.reference);
                 resetBtn();
               }
-            } catch (err) {
-              alert('Network error after payment. Please contact support.\nPayment ref: ' + response.reference);
-              resetBtn();
-            }
+            })();
           },
           onClose: function() {
             clearTimeout(safetyTimer);
