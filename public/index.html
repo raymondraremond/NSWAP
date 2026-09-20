@@ -294,14 +294,6 @@
       payBtn.disabled = true;
       payBtn.innerText = 'Opening payment...';
 
-      // Safety net: if popup never appears within 12 seconds, unfreeze the button
-      const safetyTimer = setTimeout(function() {
-        if (payBtn.disabled) {
-          resetBtn();
-          alert('Payment window did not open. This may be due to a popup blocker. Please allow popups for this site and try again.');
-        }
-      }, 12000);
-
       try {
         const handler = PaystackPop.setup({
           key: PAYSTACK_PUBLIC_KEY,
@@ -317,7 +309,6 @@
             ]
           },
           callback: function(response) {
-            clearTimeout(safetyTimer);
             payBtn.innerText = 'Completing registration...';
             // Paystack v1 does not accept async callbacks — use async IIFE inside
             (async function() {
@@ -343,7 +334,6 @@
             })();
           },
           onClose: function() {
-            clearTimeout(safetyTimer);
             resetBtn();
             alert('Payment window closed. Please complete the \u20a6500 payment to finish your sign up.');
           }
@@ -352,7 +342,6 @@
         handler.openIframe();
 
       } catch (err) {
-        clearTimeout(safetyTimer);
         resetBtn();
         alert('Could not open payment window: ' + err.message + '\nPlease check your internet connection and try again.');
       }
