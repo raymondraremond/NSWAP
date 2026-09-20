@@ -12,9 +12,211 @@
   <div class="app-container">
 
     <!-- ══════════════════════════════════════════════════════
+         LANDING PAGE
+    ══════════════════════════════════════════════════════ -->
+    <div id="landing-page" class="landing-screen hidden">
+
+      <!-- NAVBAR -->
+      <nav class="lp-nav">
+        <div class="lp-nav-inner">
+          <div class="lp-logo">NSWAP<span class="lp-logo-dot">.</span></div>
+          <div class="lp-nav-links">
+            <a href="#lp-how" class="lp-nav-link" onclick="document.getElementById('lp-how').scrollIntoView({behavior:'smooth'});return false;">How It Works</a>
+            <a href="#lp-trust" class="lp-nav-link" onclick="document.getElementById('lp-trust').scrollIntoView({behavior:'smooth'});return false;">Safety</a>
+            <button onclick="showAuthMode('login')" class="lp-btn-ghost">Log In</button>
+            <button onclick="showAuthMode('initiation')" class="lp-btn-cta">Get Started — Free</button>
+          </div>
+          <button class="lp-hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+        <div id="lp-mobile-menu" class="lp-mobile-menu hidden">
+          <button class="lp-mobile-link" onclick="document.getElementById('lp-how').scrollIntoView({behavior:'smooth'});closeMobileMenu()">How It Works</button>
+          <button class="lp-mobile-link" onclick="document.getElementById('lp-trust').scrollIntoView({behavior:'smooth'});closeMobileMenu()">Safety</button>
+          <button onclick="showAuthMode('login')" class="lp-mobile-link">Log In</button>
+          <button onclick="showAuthMode('initiation')" class="lp-btn-cta lp-mobile-cta">Get Started — Free</button>
+        </div>
+      </nav>
+
+      <!-- HERO SECTION -->
+      <section class="lp-hero">
+        <div class="lp-hero-content">
+          <div class="lp-hero-badge">&#127894; Built for NYSC Corps Members</div>
+          <h1 class="lp-h1">Find the Corps Member<br>With the Size You Need.</h1>
+          <p class="lp-hero-sub">Got jungle boots that don't fit? Khaki shirt too big? NSWAP connects you with other corps members in your deployment state so you can find exactly who has the size you need &mdash; and swap.</p>
+          <div class="lp-hero-btns">
+            <button onclick="showAuthMode('initiation')" class="lp-btn-cta lp-btn-lg">Create Free Account</button>
+            <button onclick="showAuthMode('login')" class="lp-btn-ghost lp-btn-lg">Log In to Dashboard</button>
+          </div>
+          <p class="lp-hero-note">&#10003; Free to join &nbsp;&middot;&nbsp; &#10003; State-specific listings &nbsp;&middot;&nbsp; &#8358;500 to unlock a contact</p>
+        </div>
+        <div class="lp-hero-visual" aria-hidden="true">
+          <div class="lp-vis-card lp-vis-card-top">
+            <div class="lp-vis-tag lp-tag-have">I HAVE</div>
+            <div class="lp-vis-val">Jungle Boots &mdash; Size 44</div>
+            <div class="lp-vis-tag lp-tag-need lp-mt8">I NEED</div>
+            <div class="lp-vis-val">Jungle Boots &mdash; Size 42</div>
+          </div>
+          <div class="lp-vis-swap">&#8644; MATCH</div>
+          <div class="lp-vis-card lp-vis-card-bot">
+            <div class="lp-vis-tag lp-tag-have">I HAVE</div>
+            <div class="lp-vis-val">Jungle Boots &mdash; Size 42</div>
+            <div class="lp-vis-tag lp-tag-need lp-mt8">I NEED</div>
+            <div class="lp-vis-val">Jungle Boots &mdash; Size 44</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROBLEM / SOLUTION -->
+      <section class="lp-problem">
+        <div class="lp-section-wrap">
+          <div class="lp-prob-text">
+            <div class="lp-tag">The Problem</div>
+            <h2>Camp Issued You the Wrong Size. Now What?</h2>
+            <p>At NYSC orientation camps, kit items &mdash; jungle boots, white canvas, khaki shirts and trousers &mdash; are distributed in bulk. Many corps members end up with sizes that simply don't fit.</p>
+            <p>Searching randomly wastes time. NSWAP gives you a structured, state-specific platform to find the exact person who has what you need &mdash; and needs what you have.</p>
+          </div>
+          <div class="lp-prob-cards">
+            <div class="lp-prob-card lp-prob-bad">
+              <div class="lp-prob-icon">&#10007;</div>
+              <p><strong>Without NSWAP</strong></p>
+              <p>Random searching. Wasted time. Wrong sizes. Frustration.</p>
+            </div>
+            <div class="lp-prob-card lp-prob-good">
+              <div class="lp-prob-icon">&#10003;</div>
+              <p><strong>With NSWAP</strong></p>
+              <p>Browse listings. Find your exact match. Connect and swap comfortably.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="lp-how" id="lp-how">
+        <div class="lp-section-wrap lp-how-wrap">
+          <div class="lp-tag lp-center">How It Works</div>
+          <h2 class="lp-center">Four Simple Steps to a Perfect Swap</h2>
+          <div class="lp-steps">
+            <div class="lp-step">
+              <div class="lp-step-num">01</div>
+              <h3>Browse Listings</h3>
+              <p>Log in and see all active swap listings from corps members in your same deployment state.</p>
+            </div>
+            <div class="lp-step-arr">&#8594;</div>
+            <div class="lp-step">
+              <div class="lp-step-num">02</div>
+              <h3>Find Your Match</h3>
+              <p>Find someone whose "I HAVE" matches your "I NEED" and vice versa. Mark them as matched.</p>
+            </div>
+            <div class="lp-step-arr">&#8594;</div>
+            <div class="lp-step">
+              <div class="lp-step-num">03</div>
+              <h3>Unlock Contact</h3>
+              <p>Pay a one-time &#8358;500 fee to reveal the corps member's phone number and contact details.</p>
+            </div>
+            <div class="lp-step-arr">&#8594;</div>
+            <div class="lp-step">
+              <div class="lp-step-num">04</div>
+              <h3>Swap In Person</h3>
+              <p>Call them directly. Agree on a time and place. Inspect items and complete the physical exchange.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTING EXPLANATION -->
+      <section class="lp-listing">
+        <div class="lp-section-wrap lp-listing-wrap">
+          <div class="lp-listing-text">
+            <div class="lp-tag">How Listings Work</div>
+            <h2>Post What You Have.<br>State What You Need.</h2>
+            <p>Every NSWAP listing is a simple two-part statement. You state exactly what item and size you currently have, and the size you actually need. This makes matching fast, clear, and accurate.</p>
+            <p>Listings are only visible to corps members in the same deployment state, keeping results relevant and local.</p>
+          </div>
+          <div class="lp-listing-cards">
+            <div class="lp-list-ex">
+              <div class="lp-list-row">
+                <span class="lp-list-badge lp-have-badge">I HAVE</span>
+                <span class="lp-list-val">Khaki Trouser &mdash; Size 34</span>
+              </div>
+              <div class="lp-list-row lp-mt6">
+                <span class="lp-list-badge lp-need-badge">I NEED</span>
+                <span class="lp-list-val">Khaki Trouser &mdash; Size 32</span>
+              </div>
+            </div>
+            <div class="lp-list-ex lp-list-ex-2">
+              <div class="lp-list-row">
+                <span class="lp-list-badge lp-have-badge">I HAVE</span>
+                <span class="lp-list-val">White Canvas &mdash; Size 42</span>
+              </div>
+              <div class="lp-list-row lp-mt6">
+                <span class="lp-list-badge lp-need-badge">I NEED</span>
+                <span class="lp-list-val">White Canvas &mdash; Size 40</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRUST / SAFETY -->
+      <section class="lp-trust" id="lp-trust">
+        <div class="lp-section-wrap">
+          <div class="lp-tag lp-tag-light lp-center">Safety First</div>
+          <h2 class="lp-center lp-trust-h2">NSWAP Connects You. You Handle the Swap.</h2>
+          <p class="lp-trust-sub lp-center">NSWAP is a discovery and connection platform. The physical exchange happens between corps members, face-to-face. Always inspect items before completing your swap.</p>
+          <div class="lp-trust-grid">
+            <div class="lp-trust-card">
+              <div class="lp-trust-ico">&#128274;</div>
+              <h3>Registered Members Only</h3>
+              <p>Only corps members with valid NYSC state codes can register and post listings.</p>
+            </div>
+            <div class="lp-trust-card">
+              <div class="lp-trust-ico">&#128205;</div>
+              <h3>State-Based Results</h3>
+              <p>Listings are scoped to your deployment state. You only see corps members nearby.</p>
+            </div>
+            <div class="lp-trust-card">
+              <div class="lp-trust-ico">&#129309;</div>
+              <h3>You Control the Exchange</h3>
+              <p>You arrange and complete the in-person swap. Inspect everything before you exchange.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINAL CTA -->
+      <section class="lp-final-cta">
+        <div class="lp-section-wrap lp-center">
+          <h2>Ready to Find Your Match?</h2>
+          <p>Join corps members across Nigeria using NSWAP to swap items and settle into camp comfortably.</p>
+          <div class="lp-hero-btns lp-cta-gap">
+            <button onclick="showAuthMode('initiation')" class="lp-btn-cta lp-btn-lg">Create Free Account</button>
+            <button onclick="showAuthMode('login')" class="lp-btn-ghost-dark lp-btn-lg">Log In</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="lp-footer">
+        <div class="lp-footer-wrap">
+          <div class="lp-footer-brand">
+            <div class="lp-logo lp-logo-sm">NSWAP<span class="lp-logo-dot">.</span></div>
+            <p>The NYSC Corps Member Item Exchange Platform.</p>
+          </div>
+          <div class="lp-footer-links">
+            <button onclick="showAuthMode('initiation')" class="lp-footer-btn">Sign Up</button>
+            <button onclick="showAuthMode('login')" class="lp-footer-btn">Log In</button>
+          </div>
+        </div>
+        <div class="lp-footer-copy">&copy; 2026 NSWAP &middot; For NYSC Corps Members &middot; Physical exchange is arranged between corps members directly.</div>
+      </footer>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
          AUTH SCREEN
     ══════════════════════════════════════════════════════ -->
-    <div id="auth-screen" class="screen">
+    <div id="auth-screen" class="screen hidden">
       <div class="card">
         <div class="auth-tabs">
           <button id="tab-initiation-btn" class="auth-tab" onclick="showAuthMode('initiation')">Sign Up</button>
@@ -100,7 +302,13 @@
             <span class="badge-label">CURRENT STATE OF DEPLOYMENT</span>
             <strong id="active-locked-state" class="text-locked">---</strong>
           </div>
-          <button class="btn-logout" onclick="logout()">Logout</button>
+          <div class="profile-dropdown-container">
+            <button class="btn-profile" onclick="toggleProfileMenu()">Account ▼</button>
+            <div id="profile-menu" class="profile-menu hidden">
+              <div class="profile-menu-header">My Profile</div>
+              <button class="menu-item" onclick="logout()">Sign Out</button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -189,7 +397,14 @@
       if (stored) {
         activeUser = JSON.parse(stored);
         displayMainApp();
+      } else {
+        document.getElementById('landing-page').classList.remove('hidden');
       }
+    }
+
+    function toggleProfileMenu() {
+      const menu = document.getElementById('profile-menu');
+      menu.classList.toggle('hidden');
     }
 
     async function loadCategories() {
@@ -210,6 +425,8 @@
 
     // ─── Auth Tab Switching ──────────────────────────────────
     function showAuthMode(mode) {
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
       document.getElementById('login-form-box').classList.add('hidden');
       document.getElementById('register-form-box').classList.add('hidden');
 
@@ -233,6 +450,7 @@
 
       const res  = await fetch('/api/users/login', {
         method:  'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ code, name }),
       });
@@ -267,6 +485,7 @@
       try {
         const res  = await fetch('/api/users/register', {
           method:  'POST',
+          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify(payload),
         });
@@ -290,22 +509,28 @@
 
     // ─── Display Main App ────────────────────────────────────
     function displayMainApp() {
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+
       document.getElementById('active-user-code').innerText =
         activeUser.code || activeUser.identifier || '---';
       document.getElementById('active-locked-state').innerText =
         activeUser.state_name || activeUser.state || '---';
-      document.getElementById('auth-screen').classList.add('hidden');
-      document.getElementById('main-app').classList.remove('hidden');
       loadPageData();
     }
 
     // ─── Logout ──────────────────────────────────────────────
-    function logout() {
+    async function logout() {
+      try {
+        await fetch('/api/users/logout', { method: 'POST', credentials: 'same-origin' });
+      } catch(e) {}
+      
       sessionStorage.removeItem('p2p_active_user');
       activeUser = null;
       document.getElementById('main-app').classList.add('hidden');
-      document.getElementById('auth-screen').classList.remove('hidden');
-      showAuthMode('login');
+      document.getElementById('profile-menu').classList.add('hidden');
+      document.getElementById('landing-page').classList.remove('hidden');
     }
 
     // ─── Tab / Page Switching ────────────────────────────────
@@ -336,7 +561,7 @@
       const stateLabel = activeUser.state_name || activeUser.state || '';
       document.getElementById('page-title').innerText = `Items available in ${stateLabel}`;
 
-      const res  = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`);
+      const res  = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`, { credentials: 'same-origin' });
       const data = await res.json();
       const feed = document.getElementById('order-feed');
       feed.innerHTML = '';
@@ -414,6 +639,7 @@
 
       const res  = await fetch(`/api/exchanges/${currentPage}/${activeUser.state_id}`, {
         method:  'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ user_id: userCode, have, need }),
       });
@@ -433,6 +659,7 @@
       const userCode = activeUser.code || activeUser.identifier;
       const res      = await fetch(`/api/exchanges/${currentPage}/${entryId}/match`, {
         method:  'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ user_id: userCode }),
       });
@@ -447,7 +674,7 @@
 
       const res  = await fetch(
         `/api/exchanges/${currentPage}/${entryId}?user_id=${encodeURIComponent(userCode)}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', credentials: 'same-origin' }
       );
       const data = await res.json();
       if (data.success) { loadPageData(); } else { alert(data.message); }
@@ -480,6 +707,7 @@
         // ── Step 1: Ask backend to initialise (or confirm already unlocked) ──
         const initRes  = await fetch('/api/payment/initialize', {
           method:  'POST',
+          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
             user_id:       userCode,
@@ -532,6 +760,7 @@
               try {
                 const verRes  = await fetch('/api/payment/verify', {
                   method:  'POST',
+                  credentials: 'same-origin',
                   headers: { 'Content-Type': 'application/json' },
                   body:    JSON.stringify({
                     reference: response.reference,
@@ -601,6 +830,16 @@
       } else {
         modal.removeAttribute('open');
       }
+    }
+
+    function toggleMobileMenu() {
+      const m = document.getElementById('lp-mobile-menu');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    function closeMobileMenu() {
+      const m = document.getElementById('lp-mobile-menu');
+      if (m) m.classList.add('hidden');
     }
 
   </script>

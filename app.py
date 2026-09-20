@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
+from functools import wraps
 import urllib.parse
 import os
 import re
@@ -8,7 +9,8 @@ import hmac
 import hashlib
 import requests as http_requests
 from datetime import datetime, timezone
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 # ---------------------------------------------------------
 # Paystack credentials — NEVER hardcode; set in Railway env
 # ---------------------------------------------------------
@@ -16,6 +18,32 @@ PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 
+# ---------------------------------------------------------
+# Session & Security Settings
+# ---------------------------------------------------------
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_nswap_super_secret_key_change_me')
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+# In production, require HTTPS cookies
+if os.environ.get('RAILWAY_ENVIRONMENT'):
+    app.config['SESSION_COOKIE_SECURE'] = True
+
+# ---------------------------------------------------------
+# Rate Limiting
+# ---------------------------------------------------------
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
 
 # ---------------------------------------------------------
 # 1. Database Connection
@@ -214,6 +242,14 @@ def _contact_json(unlock):
     })
 
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'message': 'Authentication required. Please log in.'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ---------------------------------------------------------
 # 5. Routes — Auth
 # ---------------------------------------------------------
@@ -228,6 +264,7 @@ def get_categories():
 
 
 @app.route('/api/users/register', methods=['POST'])
+@limiter.limit("3 per minute")
 def register_user():
     """
     FREE registration — no payment required.
@@ -258,6 +295,9 @@ def register_user():
     db.session.add(new_user)
     db.session.commit()
 
+    session['user_id'] = new_user.identifier
+    session.permanent = True
+    
     return jsonify({
         'success': True,
         'user': {
@@ -271,6 +311,7 @@ def register_user():
 
 
 @app.route('/api/users/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login_user():
     data = request.json or {}
     code = data.get('code', '').strip()
@@ -281,6 +322,10 @@ def login_user():
         return jsonify({'success': False, 'message': 'Invalid Code ID or Full Name.'}), 401
 
     category = Category.query.get(user.category_id)
+    
+    session['user_id'] = user.identifier
+    session.permanent = True
+    
     return jsonify({
         'success': True,
         'user': {
@@ -291,6 +336,11 @@ def login_user():
             'state_name': category.category_name,
         }
     })
+
+@app.route('/api/users/logout', methods=['POST'])
+def logout_user():
+    session.pop('user_id', None)
+    return jsonify({'success': True, 'message': 'Logged out successfully.'})
 
 
 # ---------------------------------------------------------
@@ -304,9 +354,12 @@ def handle_exchanges(exchange_type, category_id):
         return jsonify({'success': False, 'message': 'Invalid category.'}), 404
 
     if request.method == 'POST':
-        data    = request.json or {}
-        user_id = data.get('user_id')
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'message': 'Authentication required. Please log in.'}), 401
 
+        data    = request.json or {}
+        
         user = User.query.get(user_id)
         if not user or user.category_id != category_id:
             return jsonify({'success': False, 'message': 'Unauthorized state access.'}), 403
@@ -375,9 +428,9 @@ def handle_exchanges(exchange_type, category_id):
 
 
 @app.route('/api/exchanges/<exchange_type>/<int:entry_id>/match', methods=['POST'])
+@login_required
 def match_exchange(exchange_type, entry_id):
-    data    = request.json or {}
-    user_id = data.get('user_id')
+    user_id = session.get('user_id')
 
     if not user_id:
         return jsonify({'success': False, 'message': 'User ID required.'}), 400
@@ -393,8 +446,9 @@ def match_exchange(exchange_type, entry_id):
 
 
 @app.route('/api/exchanges/<exchange_type>/<int:entry_id>', methods=['DELETE'])
+@login_required
 def delete_exchange(exchange_type, entry_id):
-    user_id = request.args.get('user_id')
+    user_id = session.get('user_id')
     model   = EXCHANGE_MODELS.get(exchange_type)
 
     if not model:
@@ -484,6 +538,7 @@ def get_user(user_id):
 # ---------------------------------------------------------
 
 @app.route('/api/payment/initialize', methods=['POST'])
+@login_required
 def initialize_payment():
     """
     Initialize a ₦500 Paystack transaction to unlock a specific listing's contact.
@@ -494,7 +549,7 @@ def initialize_payment():
     IMPORTANT: secret key used server-side only; never sent to the browser.
     """
     data          = request.json or {}
-    requester_id  = data.get('user_id', '').strip()
+    requester_id  = session.get('user_id')
     exchange_type = data.get('exchange_type', '').strip()
     entry_id      = data.get('entry_id')
     email         = data.get('email', '').strip()
@@ -607,6 +662,7 @@ def initialize_payment():
 
 
 @app.route('/api/payment/verify', methods=['POST'])
+@login_required
 def verify_payment():
     """
     Verify a Paystack payment server-side and grant contact unlock if successful.
@@ -615,7 +671,7 @@ def verify_payment():
     """
     data         = request.json or {}
     reference    = data.get('reference', '').strip()
-    requester_id = data.get('user_id', '').strip()
+    requester_id = session.get('user_id')
 
     if not reference or not requester_id:
         return jsonify({'success': False,
@@ -709,13 +765,14 @@ def paystack_webhook():
 
 
 @app.route('/api/contact/<exchange_type>/<int:entry_id>', methods=['GET'])
+@login_required
 def get_contact_direct(exchange_type, entry_id):
     """
     Protected contact endpoint.
     Returns phone only if requester has a verified (status=success) ContactUnlock
     for this specific listing. All other cases → 403.
     """
-    requester_id = request.args.get('user_id', '').strip()
+    requester_id = session.get('user_id')
     if not requester_id:
         return jsonify({
             'success': False,
