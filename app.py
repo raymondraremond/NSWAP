@@ -237,6 +237,7 @@ def _contact_json(unlock):
             'name':  owner.name,
             'sex':   owner.sex,
             'phone': owner.phone,
+            'email': owner.email or 'No email provided',
             'state': cat.category_name if cat else 'N/A',
         }
     })
@@ -271,14 +272,14 @@ def register_user():
     Saves state code, name, sex, phone, email, deployment state.
     """
     data = request.json or {}
-    identifier = data.get('code', '').strip()
+    identifier = data.get('code', '').strip().upper()
 
     if not identifier:
         return jsonify({'success': False, 'message': 'State code is required.'}), 400
 
     if User.query.get(identifier):
         return jsonify({'success': False,
-                        'message': 'Code ID already registered. Use Log In instead.'}), 400
+                        'message': 'That state code is used already. Please log in instead.'}), 400
 
     category = Category.query.get(data.get('category_id'))
     if not category:
@@ -314,7 +315,7 @@ def register_user():
 @limiter.limit("5 per minute")
 def login_user():
     data = request.json or {}
-    code = data.get('code', '').strip()
+    code = data.get('code', '').strip().upper()
     name = data.get('name', '').strip()
 
     user = User.query.get(code)
