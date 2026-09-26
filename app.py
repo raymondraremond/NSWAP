@@ -264,6 +264,13 @@ def get_categories():
     })
 
 
+@app.route('/api/nuke-db', methods=['GET'])
+def nuke_db():
+    db.session.execute(text('TRUNCATE TABLE users CASCADE;'))
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'DATABASE WIPED SUCCESSFULLY. You can now test from scratch.'})
+
+
 @app.route('/api/users/register', methods=['POST'])
 @limiter.limit("3 per minute")
 def register_user():
