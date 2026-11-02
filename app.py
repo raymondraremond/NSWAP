@@ -24,8 +24,8 @@ app = Flask(__name__, static_folder='public', static_url_path='')
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_nswap_super_secret_key_change_me')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# In production, require HTTPS cookies
-if os.environ.get('RAILWAY_ENVIRONMENT'):
+# In production, require HTTPS cookies (works on Railway, Render, or any host)
+if os.environ.get('PRODUCTION'):
     app.config['SESSION_COOKIE_SECURE'] = True
 
 # ---------------------------------------------------------
